@@ -13,7 +13,10 @@ import {
   AlertOctagon,
   ShieldAlert,
   Activity,
-  FileText
+  FileText,
+  MessageCircle,
+  X,
+  Send
 } from "lucide-react";
 import {
   AreaChart,
@@ -24,6 +27,7 @@ import {
   Tooltip,
   ResponsiveContainer
 } from "recharts";
+
 
 export default function AegisQuantPlatform() {
   // Navigation State: 'cfo' (Boardroom) or 'ciso' (SecOps Telemetry)
@@ -45,6 +49,29 @@ export default function AegisQuantPlatform() {
   const [loadingAssets, setLoadingAssets] = useState(false);
 
   const BASELINE_VAR_INR = 5800000; // Baseline: ₹58 Lakhs
+
+  // AI Chat State
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [chatQuery, setChatQuery] = useState("");
+  const [chatHistory, setChatHistory] = useState([
+    { role: "ai", text: "I am the Aegis AI Analyst. Ask me about our highest financial risks or framework compliance (e.g. SEBI or RBI)." }
+  ]);
+
+  const handleSendMessage = async (e) => {
+    e.preventDefault();
+    if (!chatQuery.trim()) return;
+    
+    const newHistory = [...chatHistory, { role: "user", text: chatQuery }];
+    setChatHistory(newHistory);
+    setChatQuery("");
+
+    try {
+      const res = await axios.post("http://127.0.0.1:8000/api/v1/chat", { query: chatQuery });
+      setChatHistory(prev => [...prev, { role: "ai", text: res.data.response }]);
+    } catch (err) {
+      setChatHistory(prev => [...prev, { role: "ai", text: "Connection to AI engine lost." }]);
+    }
+  };
 
   // Fetch Optimization
   const fetchOptimization = async (currentBudget) => {
@@ -72,8 +99,12 @@ export default function AegisQuantPlatform() {
   };
 
   useEffect(() => {
-    fetchOptimization(budget);
-    fetchAssets();
+    const loadTelemetry = setTimeout(() => {
+      fetchOptimization(budget);
+      fetchAssets();
+    }, 0);
+
+    return () => clearTimeout(loadTelemetry);
   }, [budget]);
 
   const residualRisk = Math.max(0, BASELINE_VAR_INR - optimization.total_risk_reduced_inr);
@@ -430,6 +461,32 @@ export default function AegisQuantPlatform() {
           </div>
         </div>
       )}
+      {/* Floating AI Chatbot */}
+      <div className="fixed bottom-6 right-6 z-50">
+        {isChatOpen ? (
+          <div className="bg-slate-900 border border-slate-700 rounded-xl shadow-2xl w-80 h-96 flex flex-col animate-in slide-in-from-bottom-5">
+            <div className="bg-indigo-600 p-3 rounded-t-xl flex justify-between items-center text-white">
+              <span className="font-bold text-sm flex items-center"><MessageCircle className="w-4 h-4 mr-2"/> Aegis AI Analyst</span>
+              <button onClick={() => setIsChatOpen(false)}><X className="w-4 h-4 hover:text-slate-200" /></button>
+            </div>
+            <div className="flex-1 p-4 overflow-y-auto space-y-3 bg-slate-950/50">
+              {chatHistory.map((msg, idx) => (
+                <div key={idx} className={`text-xs p-2.5 rounded-lg max-w-[85%] ${msg.role === "ai" ? "bg-slate-800 text-slate-200 self-start" : "bg-indigo-500/20 text-indigo-200 self-end ml-auto border border-indigo-500/30"}`}>
+                  {msg.text}
+                </div>
+              ))}
+            </div>
+            <form onSubmit={handleSendMessage} className="p-3 border-t border-slate-800 bg-slate-900 rounded-b-xl flex gap-2">
+              <input type="text" value={chatQuery} onChange={(e) => setChatQuery(e.target.value)} placeholder="Ask about risks..." className="flex-1 bg-slate-950 border border-slate-700 rounded px-3 text-xs text-slate-200 focus:outline-none focus:border-indigo-500" />
+              <button type="submit" className="bg-indigo-600 p-1.5 rounded text-white hover:bg-indigo-500"><Send className="w-4 h-4"/></button>
+            </form>
+          </div>
+        ) : (
+          <button onClick={() => setIsChatOpen(true)} className="bg-indigo-600 hover:bg-indigo-500 text-white p-4 rounded-full shadow-lg transition-transform hover:scale-105 flex items-center justify-center">
+            <MessageCircle className="w-6 h-6" />
+          </button>
+        )}
+      </div>
     </div>
   );
 }

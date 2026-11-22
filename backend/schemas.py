@@ -28,6 +28,7 @@ class ControlResponse(BaseModel):
     category: Optional[str] = "General"
     cost_inr: float
     risk_reduction_inr: float
+    framework_mapping: str
     is_active: Optional[bool] = False
 
     model_config = ConfigDict(from_attributes=True)
@@ -40,6 +41,7 @@ class SelectedControl(BaseModel):
     name: str
     cost_inr: float
     risk_reduction_inr: float
+    framework_mapping: str
 
     model_config = ConfigDict(from_attributes=True)
 

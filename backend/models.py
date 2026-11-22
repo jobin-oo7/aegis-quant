@@ -42,6 +42,7 @@ class Control(Base):
     cost_inr = Column(Float, nullable=False)
     risk_reduction_inr = Column(Float, nullable=False)     # Expected financial loss averted
     category = Column(String(50), default="PREVENTION")    # PREVENTION, DETECTION, RECOVERY
+    framework_mapping = Column(String, default="NIST CSF | ISO 27001")
 
 class SimulationRun(Base):
     __tablename__ = "simulation_runs"

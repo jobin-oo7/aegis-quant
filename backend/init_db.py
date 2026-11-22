@@ -56,41 +56,49 @@ def init_and_seed():
         db.add_all(vulns)
 
         # 3. Seed Security Controls for the Optimizer
+        # 3. Seed Candidate Security Controls (with SIH required framework mappings)
         controls = [
             Control(
-                code="CTRL_MFA",
-                name="Hardware Token Phishing-Resistant MFA",
+                name="Deploy Phishing-Resistant MFA",
+                category="Identity",
                 cost_inr=200000.0,
                 risk_reduction_inr=850000.0,
-                category="PREVENTION"
+                framework_mapping="NIST: PR.AA-1 | RBI: AC-02 | SEBI: IA-02"
             ),
             Control(
-                code="CTRL_EDR",
-                name="Real-time Endpoint Detection & Response (EDR)",
+                name="Endpoint Detection & Response (EDR)",
+                category="Endpoint",
                 cost_inr=500000.0,
                 risk_reduction_inr=1800000.0,
-                category="DETECTION"
+                framework_mapping="NIST: DE.CM-1 | RBI: IR-04 | SEBI: IR-04"
             ),
             Control(
-                code="CTRL_ENC",
-                name="Database Field-Level Encryption & Key Vault",
-                cost_inr=350000.0,
-                risk_reduction_inr=1400000.0,
-                category="PREVENTION"
-            ),
-            Control(
-                code="CTRL_CSPM",
-                name="Cloud Security Posture Management & Drift Remediation",
+                name="Cloud Security Posture Management",
+                category="Cloud",
                 cost_inr=400000.0,
                 risk_reduction_inr=1200000.0,
-                category="PREVENTION"
+                framework_mapping="NIST: PR.IP-1 | RBI: CA-03 | SEBI: CM-02"
             ),
             Control(
-                code="CTRL_AUDIT",
-                name="External Third-Party Red Team Penetration Test",
-                cost_inr=600000.0,
-                risk_reduction_inr=900000.0,
-                category="DETECTION"
+                name="Database Column-Level Encryption",
+                category="Data",
+                cost_inr=350000.0,
+                risk_reduction_inr=1400000.0,
+                framework_mapping="NIST: PR.DS-1 | RBI: MP-04 | DPDP Act Sec. 8"
+            ),
+            Control(
+                name="Privileged Access Management (PAM)",
+                category="Identity",
+                cost_inr=300000.0,
+                risk_reduction_inr=110000.0,
+                framework_mapping="NIST: PR.AC-4 | RBI: AC-06 | SEBI: AC-06"
+            ),
+            Control(
+                name="Automated Patching Pipeline",
+                category="Infrastructure",
+                cost_inr=150000.0,
+                risk_reduction_inr=600000.0,
+                framework_mapping="NIST: PR.IP-12 | RBI: CM-02 | SEBI: CM-02"
             ),
         ]
         db.add_all(controls)
